@@ -1,0 +1,17 @@
+{
+  "name": "Reactive Dog Tracker",
+  "short_name": "Dog Tracker",
+  "description": "Track your reactive dog's walks, reactions and wins — privately, on your device.",
+  "id": ".",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF6EF",
+  "theme_color": "#FBF6EF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
