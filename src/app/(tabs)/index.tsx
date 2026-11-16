@@ -11,8 +11,8 @@ import { Segmented } from '@/components/ui/Controls';
 import { Card, EmptyState, Row, Screen, SectionHeader } from '@/components/ui/Layout';
 import { T } from '@/components/ui/Typography';
 import { fromDateKey, todayKey } from '@/domain/dates';
-import { dailyGreeting } from '@/domain/encouragement';
-import { dailyDogMessage, voiceContext } from '@/domain/dogVoice';
+import { homeGreeting } from '@/domain/encouragement';
+import { dailyDogMessage, homeContext } from '@/domain/dogVoice';
 import { occurrencesOn } from '@/domain/schedule';
 import type { DateKey, Marker } from '@/domain/types';
 import { useActiveDog, useDogData } from '@/store/appStore';
@@ -54,14 +54,15 @@ export default function WalksScreen() {
   });
 
   const occurrences = occurrencesOn(selected, data.schedules, data.walks);
-  const greeting = dog ? dailyGreeting({ dogName: dog.name, seed: `${today}|${dog.id}` }) : '';
   const todaysWalks = occurrencesOn(today, data.schedules, data.walks);
-  const voice = voiceContext({
+  // The greeting and the dog's message both follow the latest trend of reactions and successes.
+  const { category: voice, trend } = homeContext({
     walks: data.walks,
     markers: data.markers,
     today,
     restDay: todaysWalks.length > 0 && todaysWalks.every((o) => o.skipped),
   });
+  const greeting = dog ? homeGreeting(voice, trend, { dogName: dog.name, seed: `${today}|${dog.id}` }) : '';
   const dogMessage = dailyDogMessage(voice, `${today}|${dog?.id}`, messageOffset);
   const dayTitle = selected === today ? 'Today' : format(fromDateKey(selected), 'EEEE, MMM d');
 
@@ -78,7 +79,7 @@ export default function WalksScreen() {
       <DogSays
         dog={dog}
         message={dogMessage}
-        mood={voice === 'progress' ? 'happy' : 'calm'}
+        mood={voice === 'progress' || voice === 'firstSuccess' ? 'happy' : 'calm'}
         onAnother={() => setMessageOffset(messageOffset + 1)}
       />
 

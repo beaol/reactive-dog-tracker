@@ -52,7 +52,8 @@ export default function MarkerScreen() {
     haptic('success');
     const ctx = { dogName: dog.name, seed: marker.id };
     setSavedMessage(kind === 'reactive' ? messageAfterReaction(intensity, ctx) : messageAfterSuccess(ctx));
-    setDogMessage(messageForMoment(kind, intensity, marker.id));
+    const firstSuccess = kind === 'success' && !data.markers.some((mk) => mk.kind === 'success');
+    setDogMessage(messageForMoment(kind, intensity, marker.id, { firstSuccess }));
   };
 
   const createTrigger = () => {

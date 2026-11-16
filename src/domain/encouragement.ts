@@ -1,3 +1,5 @@
+import type { VoiceCategory } from './dogVoice';
+import type { RecentTrend } from './recentTrend';
 import type { PeriodComparison } from './stats';
 
 /**
@@ -89,6 +91,63 @@ export function messageAfterSuccess(ctx: MessageContext): string {
 
 export function dailyGreeting(ctx: MessageContext): string {
   return pick(GREETINGS, ctx);
+}
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+
+/** One sentence, with real numbers, for the best signal in an improving trend. */
+function improvingLine(trend: RecentTrend, n: string): string {
+  const { current: cur, previous: prev } = trend;
+  switch (trend.improving[0]) {
+    case 'moreSuccesses':
+      return `${plural(cur.successCount, 'calm choice')} in the last two weeks, up from ${prev.successCount}. ${n} is learning — and so are you.`;
+    case 'higherSuccessShare':
+      return `${pct(cur.successShare ?? 0)} of ${n}'s trigger moments lately were calm choices, up from ${pct(prev.successShare ?? 0)}. Your patience is paying off.`;
+    case 'softerReactions':
+      return `Reactions have softened: average intensity ${prev.meanIntensity?.toFixed(1)} → ${cur.meanIntensity?.toFixed(1)} over the last two weeks. ${n}'s worries are getting smaller.`;
+    default:
+      return `${plural(cur.reactiveCount, 'reaction')} in the last two weeks, down from ${prev.reactiveCount}. That's real progress for ${n}.`;
+  }
+}
+
+/** Kind, honest sentence for a harder trend — the numbers, then a next step. */
+function harderLine(trend: RecentTrend, n: string): string {
+  const { current: cur, previous: prev } = trend;
+  const what =
+    trend.harder[0] === 'moreReactions'
+      ? `${plural(cur.reactiveCount, 'reaction')} in the last two weeks, compared with ${prev.reactiveCount} before`
+      : `reactions have been stronger lately (average ${prev.meanIntensity?.toFixed(1)} → ${cur.meanIntensity?.toFixed(1)})`;
+  return `A harder stretch: ${what}. That's not failure — extra distance, easier walks and rest help ${n} reset.`;
+}
+
+/**
+ * The line under the home-screen title. It follows the same context as the
+ * dog's message, and uses the real numbers from the last two weeks, so what
+ * the app says always matches what has been logged.
+ */
+export function homeGreeting(category: VoiceCategory, trend: RecentTrend, ctx: MessageContext): string {
+  const n = ctx.dogName;
+  const { current: cur } = trend;
+  switch (category) {
+    case 'recovery':
+      return `${n} had a big moment recently. Today is for rest and easy, quiet walks — for both of you.`;
+    case 'stacking':
+      return `Several reactions in the last few days. ${n}'s stress may be stacking up, so an easy day can really help.`;
+    case 'firstSuccess':
+      return `${n}'s first calm choice is in the book! Remember this one. 🎉`;
+    case 'progress':
+      return improvingLine(trend, n);
+    case 'toughStretch':
+      return harderLine(trend, n);
+    case 'mixed':
+      return `A mixed two weeks: ${plural(cur.successCount, 'calm choice')} alongside some harder moments. Both are part of the path.`;
+    case 'restDay':
+      return `A rest day. Calm days are training days too — ${n}'s body and brain settle while resting.`;
+    case 'steady':
+      return `Steady lately: ${plural(cur.successCount, 'calm choice')} and ${plural(cur.reactiveCount, 'reaction')} in two weeks. Consistency is how change happens.`;
+    default:
+      return dailyGreeting(ctx);
+  }
 }
 
 export interface Insight {

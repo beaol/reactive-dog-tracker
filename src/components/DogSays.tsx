@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { DogAvatar, type PortraitMood } from '@/components/DogPortrait';
 import { T } from '@/components/ui/Typography';
-import type { DogMessage } from '@/domain/dogVoice';
+import * as WebBrowser from 'expo-web-browser';
+
+import { type DogMessage, factFor } from '@/domain/dogVoice';
 import type { Dog } from '@/domain/types';
 import { Radius, Space, useTheme } from '@/theme/theme';
 
@@ -26,6 +28,7 @@ export function DogSays({
 }) {
   const theme = useTheme();
   const [showWhy, setShowWhy] = useState(false);
+  const fact = factFor(message);
 
   return (
     <View style={styles.row} accessibilityLabel={`Message from ${dog.name}: ${message.text(dog.name)}`}>
@@ -37,7 +40,21 @@ export function DogSays({
           <T style={{ color: theme.text }}>“{message.text(dog.name)}”</T>
           {showWhy && (
             <View style={[styles.why, { backgroundColor: theme.surfaceAlt }]}>
-              <T variant="caption" tone="secondary">💡 {message.why}</T>
+              <T variant="caption" tone="secondary" style={styles.link}>💡 {fact.topic}</T>
+              <T variant="caption" tone="secondary">{fact.fact}</T>
+              <T variant="caption" tone="muted">Sources:</T>
+              {fact.sources.map((s) => (
+                <Pressable
+                  key={s.url}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Open source: ${s.title}`}
+                  onPress={() => WebBrowser.openBrowserAsync(s.url).catch(() => {})}
+                  hitSlop={4}>
+                  <T variant="caption" tone="primary">
+                    {s.by}{s.year ? ` (${s.year})` : ''} — {s.title}
+                  </T>
+                </Pressable>
+              ))}
             </View>
           )}
           <View style={styles.actions}>
@@ -93,7 +110,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
     zIndex: 1,
   },
-  why: { borderRadius: Radius.sm, padding: Space.sm },
+  why: { borderRadius: Radius.sm, padding: Space.sm, gap: 4 },
   actions: { flexDirection: 'row', gap: Space.lg, marginTop: 2 },
   link: { fontWeight: '700' },
 });

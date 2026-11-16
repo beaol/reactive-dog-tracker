@@ -21,10 +21,14 @@ All data stays **on the device** — no account, no server, no cloud.
 - **Supportive voice** — gentle messages after every log, data-backed insights that
   celebrate progress and never blame the dog (or you).
 - **Messages from your dog** — first-person notes in your dog's voice on the home screen, after
-  every logged moment and on the profile. Each has a "Why?" explanation grounded in force-free
-  behaviour science (thresholds, distance, counter-conditioning, trigger stacking, recovery,
-  not punishing growls, pain checks…), and the home message adapts to recent days
-  (recovery after a big reaction, a busy stretch, progress, rest days). See `src/domain/dogVoice.ts`.
+  every logged moment and on the profile: the words the dog can't say. Every message points to a
+  researched **"why" fact** (`src/domain/whyFacts.ts`): 26 facts on how a reactive dog feels and what
+  helps, each with sources (AVSAB, ASPCA, Dogs Trust, Best Friends, VCA, Merck Veterinary Manual and
+  peer-reviewed studies). "Why?" shows the fact and links to its sources.
+- **Trend-aware home screen** — the greeting and the dog's message follow the latest trend:
+  the last 14 days vs the 14 before (more / fewer successes and reactions, softer / stronger
+  intensity), plus recovery after a big reaction, trigger stacking, a first-ever success and rest
+  days. See `src/domain/recentTrend.ts` and `src/domain/dogVoice.ts`.
 - **Backup** — export / restore a JSON file (share sheet on phones, download on web).
 
 ## Run it
@@ -91,7 +95,10 @@ src/
     types.ts           data model
     schedule.ts        recurrence expansion, occurrence keys
     stats.ts           bucketing, metrics, period comparison, trigger breakdown
-    encouragement.ts   supportive message + insight engine
+    encouragement.ts   supportive message + insight engine, trend-aware home greeting
+    whyFacts.ts        researched "why" facts with sources
+    dogVoice.ts        messages from the dog, each tied to a fact; home-screen context
+    recentTrend.ts     last 14 days vs the 14 before
   breeds/              breed database (~120 breeds + designer mixes), fuzzy/mix matcher, traits
   components/          DogPortrait (procedural SVG), TrendChart, inputs, UI kit
   store/               Zustand store, AsyncStorage persistence, backup
@@ -114,7 +121,8 @@ Key decisions:
   counts; for intensity metrics they get a synced panel below. Colours come from a
   colour-blind-checked palette (orange = reactions, aqua = successes).
 - **No native pickers / no network.** Time and date inputs are custom components, so the same
-  UI works on web; the app makes no network requests.
+  UI works on web; the app makes no network requests of its own (tapping a "why" source opens it in
+  the browser).
 
 ## Storage location
 
